@@ -1,5 +1,3 @@
-
-
 # Ubuntu combo
 cuda 10.0 + cudnn 7.5 + tf 1.13.1
 (or cuda 10.1, tf 1.12 and over)
@@ -42,3 +40,13 @@ sudo rm /var/cache/apt/archives/lock
 sudo rm /var/lib/dpkg/lock
 
 sudo dpkg --configure -a
+
+# fix ubuntu not have wifi (after installing)
+# in my case: ubuntu 16.04, X470 AORUS, AMD 2700X
+# check iwconfig to view
+iwconfig
+# if wlp4s0 is turn off (in my case it is wlp5s0, you should modify it
+# to match)
+sudo ifconfig wlp4s0 up
+service network-manager restart
+
