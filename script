@@ -115,3 +115,8 @@ iwconfig
 sudo ifconfig wlp4s0 up
 service network-manager restart
 
+# fix ubuntu build jekyll error when running bundle install
+# /usr/bin/ruby extconf.rb
+# mkmf.rb can't find header files for ruby at /usr/lib/ruby/ruby.h
+sudo apt-get install ruby`ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]'`-dev
+
