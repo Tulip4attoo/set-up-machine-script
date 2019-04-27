@@ -119,4 +119,7 @@ service network-manager restart
 # /usr/bin/ruby extconf.rb
 # mkmf.rb can't find header files for ruby at /usr/lib/ruby/ruby.h
 sudo apt-get install ruby`ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]'`-dev
+# in case you still get trouble with nokogiri
+sudo apt-get install build-essential patch ruby-dev zlib1g-dev liblzma-dev
+gem install nokogiri
 
