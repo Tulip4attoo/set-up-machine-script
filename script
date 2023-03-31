@@ -21,10 +21,15 @@ sudo apt install nvidia-driver-525
 # not so sure if cuda 12 has some advantage? I think maybe in bp16? 
 # will revisit this later
 
+# you could follow this instruction from nvidia
+# https://developer.nvidia.com/cuda-downloads
+# and will not need 2 following lines
+
 wget https://developer.download.nvidia.com/compute/cuda/11.2.0/local_installers/cuda_11.2.0_460.27.04_linux.run
 sudo sh cuda_11.2.0_460.27.04_linux.run
 
 # Now, Update the environment variables, and add the following lines to ~/.bashrc
+# you could change cuda-xx.y to your cuda version, for example cuda-12.1
 
 export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
@@ -37,6 +42,8 @@ source ~/.bashrc
 
 # Install CUDNN
 # re check by nvcc -V
+# come here to download https://developer.nvidia.com/rdp/cudnn-archive
+# please choose the cudnn with the same version of cuda
 
 tar -zvxf cudnn-11.2-linux-x64-v8.1.0.77.tgz
 sudo cp -P cuda/include/cudnn.h /usr/local/cuda-11.2/include
