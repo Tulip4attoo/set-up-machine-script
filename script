@@ -1,129 +1,48 @@
-# Ubuntu combo
-cuda 10.0 + cudnn 7.5 + tf 1.13.1
-(or cuda 10.1, tf 1.12 and over)
+# rewrite this file to 2023 update
+# Mar 2023
 
-# install cuda
-https://cloud.google.com/compute/docs/gpus/add-gpus
+Set Up Deep Learning Env on Ubuntu 22.04
 
-# for ubuntu 16.04
-curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_10.0.130-1_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu1604_10.0.130-1_amd64.deb
-# note: check internet if it warns that cannot fetch
-sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-sudo apt-get update
-sudo apt-get install cuda-10-0
-# sometimes restart needed
-sudo nvidia-smi -pm 1
+Following this very good instruction (modified a bit - just changed the version): https://www.cloudbooklet.com/how-to-set-up-deep-learning-architecture-on-ubuntu-22-04/#install-nvidia-drivers
 
-# install cudnn, download file from: https://developer.nvidia.com/cudnn
-# remember to change the name to exact version
-sudo dpkg -i libcudnn7_7.3.0.29–1+cuda10.0_amd64.deb
-sudo dpkg -i libcudnn7-dev_7.3.0.29–1+cuda10.0_amd64.deb
-sudo dpkg -i libcudnn7-doc_7.3.0.29–1+cuda10.0_amd64.deb
+#update system 
 
-# install miniconda
-# download from: https://docs.conda.io/en/latest/miniconda.html
-bash Miniconda3-latest-Linux-x86_64.sh
+sudo apt update && sudo apt upgrade
 
-# create environment
-conda create -n [ENV_NAME] python==3.6#dont need it if python version is the latest (3.7.1 now)
-conda activate [ENV_NAME]
-conda deactivate
+# Install NVIDIA Drivers
 
-# python package
-opencv-contrib-python
-tensorflow-gpu==1.13.1
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt update
+sudo apt install nvidia-driver-525
 
-# check if tensorflow use GPU or not
-import tensorflow as tf
-with tf.device("/gpu:0"):
-  a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2,3], name = "a")
-  b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3,2], name = "b")
-  c = tf.matmul(a,b)
+# Install CUDA Toolkit and cuDNN
+# I use cuda_11.5.r11.5/compiler.30672275_0 (checking by nvcc --version)
+# maybe you should go to nvidia site and check for the suitable version
+# not so sure if cuda 12 has some advantage? I think maybe in bp16? 
+# will revisit this later
 
-with tf.Session() as sess:
-  print(sess.run(c))
+wget https://developer.download.nvidia.com/compute/cuda/11.2.0/local_installers/cuda_11.2.0_460.27.04_linux.run
+sudo sh cuda_11.2.0_460.27.04_linux.run
+
+# Now, Update the environment variables, and add the following lines to ~/.bashrc
+
+export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export CUDA_HOME=/usr/local/cuda
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+# Activate the environment variables:
+
+source ~/.bashrc
+
+# Install CUDNN
+# re check by nvcc -V
+
+tar -zvxf cudnn-11.2-linux-x64-v8.1.0.77.tgz
+sudo cp -P cuda/include/cudnn.h /usr/local/cuda-11.2/include
+sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-11.2/lib64/
+sudo chmod a+r /usr/local/cuda-11.2/lib64/libcudnn*
 
 
-# check GPU speed
-import tensorflow as tf
-device_name = tf.test.gpu_device_name()
-if device_name != '/device:GPU:0':
-  raise SystemError('GPU device not found')
-print('Found GPU at: {}'.format(device_name))
-import tensorflow as tf
-import timeit
-
-# See https://www.tensorflow.org/tutorials/using_gpu#allowing_gpu_memory_growth
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-
-with tf.device('/cpu:0'):
-  random_image_cpu = tf.random_normal((100, 100, 100, 3))
-  net_cpu = tf.layers.conv2d(random_image_cpu, 32, 7)
-  net_cpu = tf.reduce_sum(net_cpu)
-
-with tf.device('/gpu:0'):
-  random_image_gpu = tf.random_normal((100, 100, 100, 3))
-  net_gpu = tf.layers.conv2d(random_image_gpu, 32, 7)
-  net_gpu = tf.reduce_sum(net_gpu)
-
-sess = tf.Session(config=config)
-
-# Test execution once to detect errors early.
-try:
-  sess.run(tf.global_variables_initializer())
-except tf.errors.InvalidArgumentError:
-  print(
-      '\n\nThis error most likely means that this notebook is not '
-      'configured to use a GPU.  Change this in Notebook Settings via the '
-      'command palette (cmd/ctrl-shift-P) or the Edit menu.\n\n')
-  raise
-
-def cpu():
-  sess.run(net_cpu)
-  
-def gpu():
-  sess.run(net_gpu)
-  
-# Runs the op several times.
-print('Time (s) to convolve 32x7x7x3 filter over random 100x100x100x3 images '
-      '(batch x height x width x channel). Sum of ten runs.')
-print('CPU (s):')
-cpu_time = timeit.timeit('cpu()', number=10, setup="from __main__ import cpu")
-print(cpu_time)
-print('GPU (s):')
-gpu_time = timeit.timeit('gpu()', number=10, setup="from __main__ import gpu")
-print(gpu_time)
-print('GPU speedup over CPU: {}x'.format(int(cpu_time/gpu_time)))
-
-sess.close()
-
-# E: Could not get lock /var/lib/dpkg/lock-frontend - open (11: Resource temporarily unavailable)
-
-sudo rm /var/lib/apt/lists/lock
-sudo rm /var/cache/apt/archives/lock
-sudo rm /var/lib/dpkg/lock
-
-sudo dpkg --configure -a
-
-# fix ubuntu not have wifi (after installing)
-# in my case: ubuntu 16.04, X470 AORUS, AMD 2700X
-# check iwconfig to view
-iwconfig
-# if wlp4s0 is turn off (in my case it is wlp5s0, you should modify it
-# to match)
-sudo ifconfig wlp4s0 up
-service network-manager restart
-
-# fix ubuntu build jekyll error when running bundle install
-# /usr/bin/ruby extconf.rb
-# mkmf.rb can't find header files for ruby at /usr/lib/ruby/ruby.h
-sudo apt-get install ruby`ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]'`-dev
-# in case you still get trouble with nokogiri
-sudo apt-get install build-essential patch ruby-dev zlib1g-dev liblzma-dev
-gem install nokogiri
-
-# pytorch install
-# follow this link: https://pytorch.org/get-started/locally/
-conda install pytorch torchvision cudatoolkit=10.0 -c pytorch
+# It just done for cuda part. Python part could be handled easily by Conda, so I will not talk about it here. 
+# I do think torch is easy to install if you handle cuda right.
