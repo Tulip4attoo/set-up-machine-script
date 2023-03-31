@@ -5,6 +5,9 @@ Set Up Deep Learning Env on Ubuntu 22.04
 
 Following this very good instruction (modified a bit - just changed the version): https://www.cloudbooklet.com/how-to-set-up-deep-learning-architecture-on-ubuntu-22-04/#install-nvidia-drivers
 
+# for 2 graphic cards laptop, you should switch to NVIDIA card first 
+# https://www.linuxbabe.com/desktop-linux/switch-intel-nvidia-graphics-card-ubuntu
+
 #update system 
 
 sudo apt update && sudo apt upgrade
