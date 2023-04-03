@@ -1,0 +1,15 @@
+# HOW TO INSTALL 1.1.1.1 IN UBUNTU :
+
+# 1. Download the .deb file from here : https://pkg.cloudflareclient.com/pack...
+
+# 2. Open Terminal :
+
+sudo dpkg -i (PACKAGE NAME)
+apt --fix-broken install
+sudo apt update
+sudo apt upgrade 
+
+warp-cli --help
+warp-cli register
+warp-cli connect
+warp-cli disconnect
