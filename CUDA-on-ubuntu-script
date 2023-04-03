@@ -1,0 +1,58 @@
+# rewrite this file to 2023 update
+# Mar 2023
+
+# Set Up Deep Learning Env on Ubuntu 22.04
+
+# Following this very good instruction (modified a bit - just changed the version): https://www.cloudbooklet.com/how-to-set-up-deep-learning-architecture-on-ubuntu-22-04/#install-nvidia-drivers
+
+# for 2 graphic cards laptop, you should switch to NVIDIA card first 
+# https://www.linuxbabe.com/desktop-linux/switch-intel-nvidia-graphics-card-ubuntu
+
+#update system 
+
+sudo apt update && sudo apt upgrade
+
+# Install NVIDIA Drivers
+
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt update
+sudo apt install nvidia-driver-525
+
+# Install CUDA Toolkit and cuDNN
+# I use cuda_11.5.r11.5/compiler.30672275_0 (checking by nvcc --version)
+# maybe you should go to nvidia site and check for the suitable version
+# not so sure if cuda 12 has some advantage? I think maybe in bp16? 
+# will revisit this later
+
+# you could follow this instruction from nvidia
+# https://developer.nvidia.com/cuda-downloads
+# and will not need 2 following lines
+
+wget https://developer.download.nvidia.com/compute/cuda/11.2.0/local_installers/cuda_11.2.0_460.27.04_linux.run
+sudo sh cuda_11.2.0_460.27.04_linux.run
+
+# Now, Update the environment variables, and add the following lines to ~/.bashrc
+# you could change cuda-xx.y to your cuda version, for example cuda-12.1
+
+export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export CUDA_HOME=/usr/local/cuda
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+# Activate the environment variables:
+
+source ~/.bashrc
+
+# Install CUDNN
+# re check by nvcc -V
+# come here to download https://developer.nvidia.com/rdp/cudnn-archive
+# please choose the cudnn with the same version of cuda
+
+tar -zvxf cudnn-11.2-linux-x64-v8.1.0.77.tgz
+sudo cp -P cuda/include/cudnn.h /usr/local/cuda-11.2/include
+sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-11.2/lib64/
+sudo chmod a+r /usr/local/cuda-11.2/lib64/libcudnn*
+
+
+# It just done for cuda part. Python part could be handled easily by Conda, so I will not talk about it here. 
+# I do think torch is easy to install if you handle cuda right.
